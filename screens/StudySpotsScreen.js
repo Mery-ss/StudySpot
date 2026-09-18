@@ -2,7 +2,13 @@
 import React, { useState } from "react";
 
 // Importerer de React Native-komponenter, vi skal bruge
-import { View, Text, FlatList, TouchableOpacity, Button } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Button,
+} from "react-native";
 
 // Importerer vores styling
 import { GlobalStyle } from "../styles/GlobalStyle";
@@ -52,40 +58,77 @@ const studySpots = [
 ];
 
 export default function StudySpotsScreen({ navigation }) {
+
   // Husker hvilket filter brugeren har valgt
   const [filter, setFilter] = useState("Alle");
 
-  // Husker hvilke StudySpots brugeren har gemt som favoritter
+  // Husker hvilke StudySpots brugeren har gemt
   const [favorites, setFavorites] = useState([]);
 
-  // Filtrerer listen
-  const filteredStudySpots =
-    filter === "Alle"
-      ? studySpots
-      : studySpots.filter((place) => place.type === filter);
-
-  // Tilføjer eller fjerner et StudySpot fra favoritter
+  // Tilføjer eller fjerner et sted fra favoritter
   const toggleFavorite = (id) => {
     if (favorites.includes(id)) {
-      setFavorites(favorites.filter((favoriteId) => favoriteId !== id));
+      setFavorites(
+        favorites.filter((favoriteId) => favoriteId !== id)
+      );
     } else {
       setFavorites([...favorites, id]);
     }
   };
 
+  // Bestemmer hvilke StudySpots der skal vises
+  let filteredStudySpots = studySpots;
+
+  if (filter === "Stille") {
+    filteredStudySpots = studySpots.filter(
+      (place) => place.type === "Stille"
+    );
+  }
+
+  if (filter === "Gruppe") {
+    filteredStudySpots = studySpots.filter(
+      (place) => place.type === "Gruppe"
+    );
+  }
+
+  if (filter === "Favoritter") {
+    filteredStudySpots = studySpots.filter(
+      (place) => favorites.includes(place.id)
+    );
+  }
+
   return (
     <View style={GlobalStyle.container}>
-      <Text style={GlobalStyle.title}>Find et StudySpot 📚</Text>
 
-      <Text style={GlobalStyle.text}>Hvad leder du efter?</Text>
+      <Text style={GlobalStyle.title}>
+        Find et StudySpot 📚
+      </Text>
+
+      <Text style={GlobalStyle.text}>
+        Hvad leder du efter?
+      </Text>
 
       {/* Filterknapper */}
       <View>
-        <Button title="Alle" onPress={() => setFilter("Alle")} />
+        <Button
+          title="Alle"
+          onPress={() => setFilter("Alle")}
+        />
 
-        <Button title="🤫 Stille" onPress={() => setFilter("Stille")} />
+        <Button
+          title="🤫 Stille"
+          onPress={() => setFilter("Stille")}
+        />
 
-        <Button title="👥 Gruppe" onPress={() => setFilter("Gruppe")} />
+        <Button
+          title="👥 Gruppe"
+          onPress={() => setFilter("Gruppe")}
+        />
+
+        <Button
+          title="❤️ Favoritter"
+          onPress={() => setFilter("Favoritter")}
+        />
       </View>
 
       {/* Listen over StudySpots */}
@@ -94,13 +137,20 @@ export default function StudySpotsScreen({ navigation }) {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={GlobalStyle.itemContainer}>
+
             {/* Tryk på stedet for at se detaljer */}
             <TouchableOpacity
-              onPress={() => navigation.navigate("Details", { place: item })}
+              onPress={() =>
+                navigation.navigate("Details", { place: item })
+              }
             >
-              <Text style={GlobalStyle.itemTitle}>{item.name}</Text>
+              <Text style={GlobalStyle.itemTitle}>
+                {item.name}
+              </Text>
 
-              <Text style={GlobalStyle.infoText}>📍 {item.area}</Text>
+              <Text style={GlobalStyle.infoText}>
+                📍 {item.area}
+              </Text>
 
               <Text style={GlobalStyle.infoText}>
                 🤫 Støjniveau: {item.noise}
@@ -112,16 +162,28 @@ export default function StudySpotsScreen({ navigation }) {
             </TouchableOpacity>
 
             {/* Favoritknap */}
-            <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
+            <TouchableOpacity
+              onPress={() => toggleFavorite(item.id)}
+            >
               <Text style={GlobalStyle.infoText}>
                 {favorites.includes(item.id)
                   ? "❤️ Gemt som favorit"
                   : "🤍 Gem som favorit"}
               </Text>
             </TouchableOpacity>
+
           </View>
         )}
       />
+
+      {/* Besked hvis brugeren ikke har nogen favoritter */}
+      {filter === "Favoritter" &&
+        filteredStudySpots.length === 0 && (
+          <Text style={GlobalStyle.text}>
+            Du har ingen gemte favoritter endnu ❤️
+          </Text>
+        )}
+
     </View>
   );
 }
