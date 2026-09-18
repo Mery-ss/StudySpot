@@ -4,10 +4,10 @@ import React from "react";
 // Importerer de React Native-komponenter, vi skal bruge
 import { View, Text, Button } from "react-native";
 
-// Importerer vores styling fra den separate styling-fil
+// Importerer vores styling
 import { GlobalStyle } from "../styles/GlobalStyle";
 
-// DetailsScreen viser information om det StudySpot, brugeren har valgt
+// DetailsScreen viser information om det valgte StudySpot
 export default function DetailsScreen({ route, navigation }) {
 
   // Henter det valgte studiested fra StudySpotsScreen
@@ -16,29 +16,38 @@ export default function DetailsScreen({ route, navigation }) {
   return (
     <View style={GlobalStyle.container}>
 
-      {/* Navnet på det valgte StudySpot */}
+      {/* Navnet på StudySpottet */}
       <Text style={GlobalStyle.title}>
-        {place.name}
+        📍 {place.name}
       </Text>
 
-      {/* Information om studiestedet */}
-      <Text style={GlobalStyle.text}>
-        Støjniveau: {place.noise}
+      {/* Område */}
+      <Text style={GlobalStyle.subtitle}>
+        {place.area}
       </Text>
 
-      <Text style={GlobalStyle.text}>
-        Wi-Fi: {place.wifi}
-      </Text>
+      {/* Information om stedet */}
+      <View style={GlobalStyle.itemContainer}>
 
-      <Text style={GlobalStyle.text}>
-        Strøm: {place.power}
-      </Text>
+        <Text style={GlobalStyle.infoText}>
+          🤫 Støjniveau: {place.noise}
+        </Text>
 
-      <Text style={GlobalStyle.text}>
-        Bedst til: {place.bestFor}
-      </Text>
+        <Text style={GlobalStyle.infoText}>
+          📶 Wi-Fi: {place.wifi}
+        </Text>
 
-      {/* Knap der sender brugeren tilbage til listen */}
+        <Text style={GlobalStyle.infoText}>
+          🔌 Strøm: {place.power}
+        </Text>
+
+        <Text style={GlobalStyle.infoText}>
+          📚 Bedst til: {place.bestFor}
+        </Text>
+
+      </View>
+
+      {/* Knap tilbage til listen */}
       <Button
         title="Tilbage til StudySpots"
         onPress={() => navigation.goBack()}
@@ -47,4 +56,3 @@ export default function DetailsScreen({ route, navigation }) {
     </View>
   );
 }
-
