@@ -1,189 +1,145 @@
-// Importerer React og useState
-import React, { useState } from "react";
-
-// Importerer de React Native-komponenter, vi skal bruge
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
   Button,
+  TextInput,
 } from "react-native";
-
-// Importerer vores styling
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GlobalStyle } from "../styles/GlobalStyle";
-
-// Liste med StudySpots
-const studySpots = [
-  {
-    id: "1",
-    name: "CBS Library",
-    area: "Solbjerg Plads",
-    noise: "Lavt",
-    wifi: "Ja",
-    power: "Ja",
-    bestFor: "Individuel læsning",
-    type: "Stille",
-  },
-  {
-    id: "2",
-    name: "Frederiksberg Bibliotek",
-    area: "Frederiksberg",
-    noise: "Lavt",
-    wifi: "Ja",
-    power: "Ja",
-    bestFor: "Fordybelse og opgaveskrivning",
-    type: "Stille",
-  },
-  {
-    id: "3",
-    name: "Café Nexus",
-    area: "Solbjerg Plads",
-    noise: "Mellem",
-    wifi: "Ja",
-    power: "Begrænset",
-    bestFor: "Gruppearbejde",
-    type: "Gruppe",
-  },
-  {
-    id: "4",
-    name: "CBS Library – Dalgas Have",
-    area: "Dalgas Have 15",
-    noise: "Lavt",
-    wifi: "Ja",
-    power: "Ja",
-    bestFor: "Individuel læsning og fordybelse",
-    type: "Stille",
-  },
-];
+import { studySpots } from "../data/studySpots";
 
 export default function StudySpotsScreen({ navigation }) {
-
-  // Husker hvilket filter brugeren har valgt
   const [filter, setFilter] = useState("Alle");
-
-  // Husker hvilke StudySpots brugeren har gemt
   const [favorites, setFavorites] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  const [search, setSearch] = useState("");
 
-  // Tilføjer eller fjerner et sted fra favoritter
+  // Hent gemte favoritter
+  useEffect(() => {
+    const loadFavorites = async () => {
+      try {
+        const savedFavorites = await AsyncStorage.getItem("favorites");
+
+        if (savedFavorites !== null) {
+          setFavorites(JSON.parse(savedFavorites));
+        }
+      } catch (error) {
+        console.log("Fejl ved hentning af favoritter:", error);
+      } finally {
+        setLoaded(true);
+      }
+    };
+
+    loadFavorites();
+  }, []);
+
+  // Gem favoritter, når de ændres
+  useEffect(() => {
+    if (!loaded) {
+      return;
+    }
+
+    const saveFavorites = async () => {
+      try {
+        await AsyncStorage.setItem("favorites", JSON.stringify(favorites));
+      } catch (error) {
+        console.log("Fejl ved gemning af favoritter:", error);
+      }
+    };
+
+    saveFavorites();
+  }, [favorites, loaded]);
+
   const toggleFavorite = (id) => {
     if (favorites.includes(id)) {
-      setFavorites(
-        favorites.filter((favoriteId) => favoriteId !== id)
-      );
+      setFavorites(favorites.filter((favoriteId) => favoriteId !== id));
     } else {
       setFavorites([...favorites, id]);
     }
   };
 
-  // Bestemmer hvilke StudySpots der skal vises
   let filteredStudySpots = studySpots;
 
+  // Filtrering efter type
   if (filter === "Stille") {
-    filteredStudySpots = studySpots.filter(
-      (place) => place.type === "Stille"
+    filteredStudySpots = filteredStudySpots.filter(
+      (place) => place.type === "Stille",
     );
   }
 
   if (filter === "Gruppe") {
-    filteredStudySpots = studySpots.filter(
-      (place) => place.type === "Gruppe"
+    filteredStudySpots = filteredStudySpots.filter(
+      (place) => place.type === "Gruppe",
     );
   }
 
   if (filter === "Favoritter") {
-    filteredStudySpots = studySpots.filter(
-      (place) => favorites.includes(place.id)
+    filteredStudySpots = filteredStudySpots.filter((place) =>
+      favorites.includes(place.id),
     );
   }
 
+  // Søgning efter navn eller område
+  filteredStudySpots = filteredStudySpots.filter(
+    (place) =>
+      place.name.toLowerCase().includes(search.toLowerCase()) ||
+      place.area.toLowerCase().includes(search.toLowerCase()),
+  );
+
   return (
     <View style={GlobalStyle.container}>
+      <Text style={GlobalStyle.title}>Find et StudySpot 📚</Text>
+      <Text style={GlobalStyle.text}>Hvad leder du efter?</Text>
 
-      <Text style={GlobalStyle.title}>
-        Find et StudySpot 📚
-      </Text>
+      <TextInput
+        style={GlobalStyle.searchInput}
+        placeholder="🔎 Søg efter studiested..."
+        value={search}
+        onChangeText={setSearch}
+      />
 
-      <Text style={GlobalStyle.text}>
-        Hvad leder du efter?
-      </Text>
-
-      {/* Filterknapper */}
       <View>
-        <Button
-          title="Alle"
-          onPress={() => setFilter("Alle")}
-        />
-
-        <Button
-          title="🤫 Stille"
-          onPress={() => setFilter("Stille")}
-        />
-
-        <Button
-          title="👥 Gruppe"
-          onPress={() => setFilter("Gruppe")}
-        />
-
-        <Button
-          title="❤️ Favoritter"
-          onPress={() => setFilter("Favoritter")}
-        />
+        <Button title="Alle" onPress={() => setFilter("Alle")} />
+        <Button title="🤫 Stille" onPress={() => setFilter("Stille")} />
+        <Button title="👥 Gruppe" onPress={() => setFilter("Gruppe")} />
+        <Button title="❤️ Favoritter" onPress={() => setFilter("Favoritter")} />
       </View>
 
-      {/* Listen over StudySpots */}
       <FlatList
         data={filteredStudySpots}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={GlobalStyle.itemContainer}>
-
-            {/* Tryk på stedet for at se detaljer */}
             <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("Details", { place: item })
-              }
+              onPress={() => navigation.navigate("Details", { place: item })}
             >
-              <Text style={GlobalStyle.itemTitle}>
-                {item.name}
-              </Text>
-
-              <Text style={GlobalStyle.infoText}>
-                📍 {item.area}
-              </Text>
-
+              <Text style={GlobalStyle.itemTitle}>{item.name}</Text>
+              <Text style={GlobalStyle.infoText}>📍 {item.area}</Text>
               <Text style={GlobalStyle.infoText}>
                 🤫 Støjniveau: {item.noise}
               </Text>
-
               <Text style={GlobalStyle.infoText}>
                 📚 Bedst til: {item.bestFor}
               </Text>
             </TouchableOpacity>
 
-            {/* Favoritknap */}
-            <TouchableOpacity
-              onPress={() => toggleFavorite(item.id)}
-            >
+            <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
               <Text style={GlobalStyle.infoText}>
                 {favorites.includes(item.id)
                   ? "❤️ Gemt som favorit"
                   : "🤍 Gem som favorit"}
               </Text>
             </TouchableOpacity>
-
           </View>
         )}
       />
 
-      {/* Besked hvis brugeren ikke har nogen favoritter */}
-      {filter === "Favoritter" &&
-        filteredStudySpots.length === 0 && (
-          <Text style={GlobalStyle.text}>
-            Du har ingen gemte favoritter endnu ❤️
-          </Text>
-        )}
-
+      {filteredStudySpots.length === 0 && (
+        <Text style={GlobalStyle.text}>Ingen studiesteder fundet.</Text>
+      )}
     </View>
   );
 }

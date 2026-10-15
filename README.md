@@ -29,4 +29,5 @@ Appen er udviklet med:
 StudySpot er blevet afprøvet af to nye CBS-studerende for at få feedback på appens funktioner og muligheder for videreudvikling.
 
 ## Demovideo
+
 Se demovideo af StudySpot: (https://github.com/Mery-ss/StudySpot/blob/main/studyspot-demo.mp4)

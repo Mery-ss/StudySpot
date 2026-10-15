@@ -3,7 +3,6 @@ import { StyleSheet } from "react-native";
 
 // Samler appens styling i én separat fil
 export const GlobalStyle = StyleSheet.create({
-
   // Bruges som container på vores screens
   container: {
     flex: 1,
@@ -62,4 +61,13 @@ export const GlobalStyle = StyleSheet.create({
     marginBottom: 5,
   },
 
+  searchInput: {
+    backgroundColor: "white",
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 15,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#DDD",
+  },
 });
