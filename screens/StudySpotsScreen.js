@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -12,23 +13,26 @@ import { GlobalStyle } from "../styles/GlobalStyle";
 import { studySpots } from "../data/studySpots";
 
 export default function StudySpotsScreen({ navigation }) {
+  // useState gemmer skærmens aktuelle værdier.
   const [filter, setFilter] = useState("Alle");
   const [favorites, setFavorites] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [search, setSearch] = useState("");
 
-  // Hent gemte favoritter
+  // Hent de gemte favoritter fra AsyncStorage, når skærmen åbnes.
   useEffect(() => {
     const loadFavorites = async () => {
       try {
         const savedFavorites = await AsyncStorage.getItem("favorites");
 
+        // Hvis der findes gemte favoritter, omdannes JSON til et array.
         if (savedFavorites !== null) {
           setFavorites(JSON.parse(savedFavorites));
         }
       } catch (error) {
         console.log("Fejl ved hentning af favoritter:", error);
       } finally {
+        // Markerer, at indlæsningen er afsluttet.
         setLoaded(true);
       }
     };
@@ -36,14 +40,16 @@ export default function StudySpotsScreen({ navigation }) {
     loadFavorites();
   }, []);
 
-  // Gem favoritter, når de ændres
+  // Gem favoritterne, når de ændres, så de stadig findes efter genstart.
   useEffect(() => {
+    // Vent med at gemme, indtil de tidligere favoritter er indlæst.
     if (!loaded) {
       return;
     }
 
     const saveFavorites = async () => {
       try {
+        // JSON.stringify omdanner arrayet til tekst, som AsyncStorage kan gemme.
         await AsyncStorage.setItem("favorites", JSON.stringify(favorites));
       } catch (error) {
         console.log("Fejl ved gemning af favoritter:", error);
@@ -53,17 +59,21 @@ export default function StudySpotsScreen({ navigation }) {
     saveFavorites();
   }, [favorites, loaded]);
 
+  // Tilføj et studiested til favoritter, eller fjern det igen.
   const toggleFavorite = (id) => {
     if (favorites.includes(id)) {
+      // Hvis stedet allerede er gemt, fjernes det fra arrayet.
       setFavorites(favorites.filter((favoriteId) => favoriteId !== id));
     } else {
+      // Ellers tilføjes stedets id til favoritterne.
       setFavorites([...favorites, id]);
     }
   };
 
+  // Start med alle studiesteder fra datafilen.
   let filteredStudySpots = studySpots;
 
-  // Filtrering efter type
+  // Filtrering efter studiestedets type.
   if (filter === "Stille") {
     filteredStudySpots = filteredStudySpots.filter(
       (place) => place.type === "Stille",
@@ -76,13 +86,15 @@ export default function StudySpotsScreen({ navigation }) {
     );
   }
 
+  // Vis kun de steder, hvis id findes i favoritlisten.
   if (filter === "Favoritter") {
     filteredStudySpots = filteredStudySpots.filter((place) =>
       favorites.includes(place.id),
     );
   }
 
-  // Søgning efter navn eller område
+  // Søg efter tekst i enten stedets navn eller område.
+  // Søgningen kombineres med det valgte filter.
   filteredStudySpots = filteredStudySpots.filter(
     (place) =>
       place.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -94,6 +106,7 @@ export default function StudySpotsScreen({ navigation }) {
       <Text style={GlobalStyle.title}>Find et StudySpot 📚</Text>
       <Text style={GlobalStyle.text}>Hvad leder du efter?</Text>
 
+      {/* Søgefeltet opdaterer search, når brugeren skriver. */}
       <TextInput
         style={GlobalStyle.searchInput}
         placeholder="🔎 Søg efter studiested..."
@@ -101,6 +114,7 @@ export default function StudySpotsScreen({ navigation }) {
         onChangeText={setSearch}
       />
 
+      {/* Knapperne vælger, hvilke studiesteder der skal vises. */}
       <View>
         <Button title="Alle" onPress={() => setFilter("Alle")} />
         <Button title="🤫 Stille" onPress={() => setFilter("Stille")} />
@@ -108,11 +122,13 @@ export default function StudySpotsScreen({ navigation }) {
         <Button title="❤️ Favoritter" onPress={() => setFilter("Favoritter")} />
       </View>
 
+      {/* FlatList viser de studiesteder, der passer til søgning og filter. */}
       <FlatList
         data={filteredStudySpots}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={GlobalStyle.itemContainer}>
+            {/* Åbner detaljeskærmen for det valgte studiested. */}
             <TouchableOpacity
               onPress={() => navigation.navigate("Details", { place: item })}
             >
@@ -126,6 +142,7 @@ export default function StudySpotsScreen({ navigation }) {
               </Text>
             </TouchableOpacity>
 
+            {/* Knappen gemmer eller fjerner stedet som favorit. */}
             <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
               <Text style={GlobalStyle.infoText}>
                 {favorites.includes(item.id)
@@ -137,6 +154,7 @@ export default function StudySpotsScreen({ navigation }) {
         )}
       />
 
+      {/* Vis en besked, hvis søgning og filter ikke giver resultater. */}
       {filteredStudySpots.length === 0 && (
         <Text style={GlobalStyle.text}>Ingen studiesteder fundet.</Text>
       )}

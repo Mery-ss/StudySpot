@@ -1,4 +1,5 @@
 export const studySpots = [
+  // Hvert studiested har et unikt id og oplysninger, som appen viser og filtrerer efter.
   {
     id: "1",
     name: "CBS Library",
@@ -44,3 +45,6 @@ export const studySpots = [
     type: "Stille",
   },
 ];
+
+// Dataene importeres i StudySpotsScreen, hvor de bruges til at vise,
+// søge efter og filtrere studiestederne.
