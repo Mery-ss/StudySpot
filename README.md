@@ -82,11 +82,10 @@ Start appen:
 
 ## Demovideoer
 
-StudySpot 1.0:
-[Se demovideo](https://github.com/Mery-ss/StudySpot/blob/main/studyspot-demo.mp4)
+**StudySpot 1.0:** [Se demovideo](https://github.com/Mery-ss/StudySpot/blob/main/studyspot-demo.mp4)
 
-StudySpot 2.0:
-[Se demovideo](https://github.com/Mery-ss/StudySpot/blob/main/studyspot-demo-2.mp4)
+**StudySpot 2.0:** [Se demovideo](https://github.com/Mery-ss/StudySpot/blob/main/studyspot-demo-2.MP4)
+
 
 ## GitHub
 
